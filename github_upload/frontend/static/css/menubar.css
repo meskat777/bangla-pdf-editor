@@ -1,0 +1,124 @@
+/* Menu Bar Styles - MS Word Inspired */
+
+/* Menu Bar Container */
+.menu-bar {
+    background: #f3f3f3;
+    border-bottom: 1px solid #d1d1d1;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-size: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* Menu Items */
+.menu-item {
+    position: relative;
+    padding: 6px 12px;
+    cursor: pointer;
+    color: #323130;
+    border-radius: 2px;
+    transition: background-color 0.2s;
+}
+
+.menu-item:hover {
+    background-color: #e1e1e1;
+}
+
+.menu-item.active {
+    background-color: #d1d1d1;
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    border: 1px solid #d1d1d1;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    min-width: 220px;
+    display: none;
+    z-index: 1001;
+    margin-top: 2px;
+}
+
+.menu-item.active .dropdown-menu {
+    display: block;
+}
+
+/* Menu Option */
+.menu-option {
+    padding: 8px 30px 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    color: #323130;
+    font-size: 13px;
+}
+
+.menu-option:hover {
+    background-color: #f3f3f3;
+}
+
+.menu-option.disabled {
+    color: #a19f9d;
+    cursor: not-allowed;
+}
+
+.menu-option.disabled:hover {
+    background-color: transparent;
+}
+
+/* Menu Icons */
+.menu-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    display: inline-block;
+}
+
+/* Keyboard Shortcut */
+.menu-shortcut {
+    color: #605e5c;
+    font-size: 11px;
+    margin-left: 20px;
+}
+
+/* Menu Separator */
+.menu-separator {
+    height: 1px;
+    background: #edebe9;
+    margin: 4px 0;
+}
+
+/* Submenu Arrow */
+.menu-option.has-submenu::after {
+    content: '▶';
+    position: absolute;
+    right: 8px;
+    font-size: 8px;
+    color: #605e5c;
+}
+
+/* Submenu */
+.submenu {
+    position: absolute;
+    left: 100%;
+    top: -1px;
+    background: white;
+    border: 1px solid #d1d1d1;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    min-width: 180px;
+    display: none;
+}
+
+.menu-option.has-submenu:hover .submenu {
+    display: block;
+}
