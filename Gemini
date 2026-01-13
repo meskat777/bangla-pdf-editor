@@ -1,0 +1,147 @@
+টেক্সট এখন দৃশ্যমান হচ্ছে কিন্তু সাইজ ছোট দেখাচ্ছে—এর মানে হলো ব্রাউজারের পিক্সেল (Pixels) এবং পিডিএফ-এর পয়েন্ট (Points) সিস্টেমের মধ্যে সমন্বয় ঠিকমতো হচ্ছে না। পিডিএফে ফন্ট সাইজ মূলত Points (1/72 inch) হিসেবে কাজ করে, কিন্তু ব্রাউজারে এটি স্ক্রিন রেজোলিউশন বা জুম লেভেলের ওপর নির্ভর করে।
+
+অরিজিনাল টেক্সটের হুবহু সাইজ পেতে হলে আমাদের টেক্সট ইনসার্ট করার আগে ওই নির্দিষ্ট জায়গার মেটাডাটা থেকে original_font_size বের করে সেটি ব্যবহার করতে হবে।
+
+নিচে আপনার pdf_processor.py ফাইলের জন্য সংশোধিত কোড দেওয়া হলো যা ফন্ট সাইজের এই অসংগতি দূর করবে:
+১. ফন্ট সাইজ ফিক্স করার জন্য সংশোধিত কোড
+
+এই কোডটি সরাসরি পিডিএফ থেকে ওই শব্দের আসল ফন্ট সাইজটি পড়বে এবং নতুন টেক্সটের ওপর সেটি প্রয়োগ করবে।
+Python
+
+def apply_edit_immediately(self, input_path, page_num, bbox, original_text, new_text, font_name, font_size, color, position):
+    try:
+        doc = fitz.open(input_path)
+        page = doc[page_num]
+        
+        if bbox and len(bbox) == 4:
+            word_rect = fitz.Rect(bbox[0], bbox[1], bbox[2], bbox[3])
+            
+            # ১. অরিজিনাল ফন্ট সাইজ বের করা (এটিই সবচাইতে গুরুত্বপূর্ণ ধাপ)
+            # ফ্রন্টএন্ড থেকে পাঠানো সাইজের বদলে সরাসরি পিডিএফ মেটাডাটা ব্যবহার করুন
+            try:
+                text_dict = page.get_text("dict", clip=word_rect)
+                # মেটাডাটা থেকে অরিজিনাল স্প্যান বের করা
+                span = text_dict["blocks"][0]["lines"][0]["spans"][0]
+                actual_font_size = span.get("size", font_size) # যদি না পায় তবে ব্যাকআপ সাইজ নেবে
+                logger.info(f"✓ Detected Original Font Size: {actual_font_size}")
+            except (IndexError, KeyError):
+                actual_font_size = font_size # ফেইল করলে ইনপুট সাইজ ব্যবহার করবে
+                logger.warning("Could not detect original size, using provided size.")
+
+            # ২. রেড্যাকশন এবং ক্লিনিং (আগের মতো)
+            page.add_redact_annot(word_rect, fill=(1, 1, 1))
+            page.apply_redactions()
+
+            # ৩. কনভার্সন এবং ফন্ট ম্যানেজমেন্ট
+            encoding_type = self.detect_font_encoding(font_name) 
+            text_to_insert = new_text
+            if encoding_type == "ANSI":
+                from backend.utils.unicode_to_bijoy_converter import UnicodeToBijoyConverter
+                text_to_insert = UnicodeToBijoyConverter().convert(new_text)
+
+            # ৪. টেক্সট ইনসার্ট (অরিজিনাল সাইজ ব্যবহার করে)
+            # y1 থেকে সামান্য উপরে বসালে এটি লাইনের সাথে ঠিকমতো এলাইন হবে
+            insert_point = fitz.Point(word_rect.x0, word_rect.y1 - 1.5) 
+            
+            page.insert_text(
+                point=insert_point,
+                text=text_to_insert,
+                fontsize=actual_font_size, # এখানে আমরা উদ্ধার করা আসল সাইজটি দিচ্ছি
+                fontfile=self._get_font_path(font_name),
+                color=self._hex_to_rgb(color),
+                overlay=True,
+                render_mode=0
+            )
+
+            # ৫. প্রফেশনাল সেভ
+            temp_path = input_path + ".rescale.pdf"
+            doc.save(temp_path, garbage=4, deflate=True, clean=True)
+            doc.close()
+            import os
+            os.replace(temp_path, input_path)
+            
+        return True
+    except Exception as e:
+        logger.error(f"Error scaling text: {e}")
+        return False
+
+২. কেন টেক্সট ছোট দেখাচ্ছিল?
+
+    পিক্সেল বনাম পয়েন্ট: আপনার ফ্রন্টএন্ড হয়তো ব্রাউজারের জুম করা পিক্সেল ভ্যালু (যেমন ১০ পিক্সেল) পাঠাচ্ছিল, যা পিডিএফে অনেক ছোট হয়ে যায়।
+
+    রিলেটিভ সাইজ: পিডিএফে 72 Points = 1 Inch। যদি আপনার ল্যাপটপের রেজোলিউশন বেশি হয়, তবে ১০ পয়েন্টের একটি লেখা স্ক্রিনে অনেক ছোট দেখাবে।
+
+    সমাধান: আমরা এখন সরাসরি পিডিএফ ফাইলের ইন্টারনাল Font Dictionary থেকে ওই শব্দের সাইজ নিচ্ছি, যা কোনো জুম বা স্ক্রিন রেজোলিউশনের ওপর নির্ভর করে না।
+
+৩. আপনার জন্য পরবর্তী পদক্ষেপ
+
+১. টেস্ট করুন: উপরের কোডটি প্রয়োগ করার পর একটি ইংরেজি শব্দ এডিট করে দেখুন সেটি কি অরিজিনাল সাইজের সাথে মিলছে কি না। ২. এলাইনমেন্ট: যদি দেখেন লেখাটি একটু বেশি নিচে বা উপরে চলে যাচ্ছে, তবে word_rect.y1 - 1.5 এই মানটি (যেমন - 1.0 বা - 2.0) পরিবর্তন করে অ্যাডজাস্ট করে নিন।
+
+আপনি কি চান আমি ফ্রন্টএন্ডের জন্য একটি 'Zoom Compensation' লজিক লিখে দিই? যাতে স্ক্রিনে জুম করলেও এডিট বক্সে টেক্সট সাইজ ঠিকমতো দেখায়। Would you like me to help adjust the frontend display size to match the PDF points?
+
+হ্যাঁ দাও
+
+ফ্রন্টএন্ডের জন্য Zoom Compensation লজিকটি অত্যন্ত গুরুত্বপূর্ণ, কারণ ব্রাউজারের পিক্সেল (CSS Pixels) এবং পিডিএফ-এর পয়েন্ট (Points) সিস্টেম আলাদাভাবে কাজ করে। বিশেষ করে যখন ইউজার ব্রাউজার জুম (Ctrl + / -) করে, তখন ইনপুট বক্সের টেক্সট সাইজ ছোট-বড় হয়ে যেতে পারে।
+
+নিচে একটি কমপ্লিট জাভাস্ক্রিপ্ট লজিক দেওয়া হলো যা আপনার editor.html বা ফ্রন্টএন্ডে ব্যবহার করবেন:
+১. Zoom Compensation ক্যালকুলেশন ফাংশন
+
+এই ফাংশনটি নিশ্চিত করবে যে পিডিএফ-এর Point সাইজকে ব্রাউজারের বর্তমান জুম এবং ডিসপ্লে রেজোলিউশন অনুযায়ী Pixel-এ রূপান্তর করা হচ্ছে।
+JavaScript
+
+/**
+ * PDF Points কে Browser Pixels-এ রূপান্তর করার ফাংশন
+ * @param {number} pdfFontSize - পিডিএফ থেকে পাওয়া আসল ফন্ট সাইজ (Points)
+ * @param {number} canvasWidth - বর্তমানে ব্রাউজারে পিডিএফ ইমেজটি কত চওড়া (Pixels)
+ * @param {number} originalPdfWidth - পিডিএফ-এর আসল চওড়া (Points)
+ * @returns {string} - CSS এর জন্য উপযুক্ত ফন্ট সাইজ (যেমন: "14.5px")
+ */
+function calculateZoomCompensatedSize(pdfFontSize, canvasWidth, originalPdfWidth) {
+    // ১. স্কেল ফ্যাক্টর বের করা (পিডিএফ বনাম ব্রাউজার ভিউ)
+    const scaleFactor = canvasWidth / originalPdfWidth;
+    
+    // ২. ডিভাইস পিক্সেল রেশিও (High-DPI বা রেটিনা ডিসপ্লের জন্য)
+    const dpr = window.devicePixelRatio || 1;
+    
+    // ৩. ফাইনাল পিক্সেল সাইজ ক্যালকুলেশন
+    // ৭২ পয়েন্ট = ১ ইঞ্চি, ব্রাউজারে সাধারণত ৯৬ পিক্সেল = ১ ইঞ্চি ধরা হয়
+    const pixelSize = pdfFontSize * scaleFactor * (96 / 72);
+    
+    return `${pixelSize}px`;
+}
+
+২. ইনপুট বক্স তৈরিতে এর প্রয়োগ
+
+আপনার যখন OCR ডাটা থেকে ইনপুট বক্সগুলো জেনারেট করবেন (যেমন processSelection ফাংশনে), তখন এটি এভাবে ব্যবহার করুন:
+JavaScript
+
+function createOCRInput(wordData, canvasElement, pdfMetadata) {
+    const input = document.createElement('input');
+    input.className = 'ocr-input';
+    
+    // wordData.size হলো পিডিএফ থেকে পাওয়া আসল ফন্ট সাইজ
+    const compensatedSize = calculateZoomCompensatedSize(
+        wordData.size, 
+        canvasElement.clientWidth, 
+        pdfMetadata.width
+    );
+    
+    // স্টাইল সেট করা
+    input.style.fontSize = compensatedSize;
+    input.style.position = 'absolute';
+    input.style.left = (wordData.bbox[0] * (canvasElement.clientWidth / pdfMetadata.width)) + 'px';
+    input.style.top = (wordData.bbox[1] * (canvasElement.clientHeight / pdfMetadata.height)) + 'px';
+    
+    // ফন্ট ফ্যামিলি সেট করা (বিজয় ফন্টের জন্য SutonnyMJ বা ইউনিকোডের জন্য SolaimanLipi)
+    input.style.fontFamily = wordData.font.includes('MJ') ? 'SutonnyMJ' : 'SolaimanLipi';
+    
+    input.value = wordData.text;
+    return input;
+}
+
+৩. কেন এটি ব্যবহার করবেন?
+
+১. Visual Matching: আপনার এডিট বক্সে টেক্সটটি দেখতে হুবহু পিডিএফ-এর অরিজিনাল টেক্সটের মতো সাইজের হবে। ২. Responsive Editing: যদি ইউজার ব্রাউজার উইন্ডো রী-সাইজ করে বা জুম ইন-আউট করে, তবে clientWidth এর পরিবর্তনের সাথে সাথে ফন্ট সাইজটিও অটোমেটিক অ্যাডজাস্ট হবে। ৩. Precision Placement: এটি নিশ্চিত করে যে ইনপুট বক্সটি ঠিক ওই শব্দের ওপরই বসছে, যার ফলে এডিটিং এক্সপেরিয়েন্স অনেক নিখুঁত হয়।
+একটি প্রো-টিপ:
+
+উবুন্টু বা লিনাক্স সিস্টেমে ব্রাউজারের ডিফল্ট রেন্ডারিং অনেক সময় টেক্সটকে সামান্য 'ব্লারি' দেখাতে পারে। এটি ঠিক করতে সিএসএস-এ text-rendering: optimizeLegibility; এবং -webkit-font-smoothing: antialiased; ব্যবহার করতে পারেন।

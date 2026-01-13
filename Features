@@ -1,0 +1,129 @@
+Need Features
+
+## 📋 COMPLETE FEATURE LIST: 114/114
+
+### **Text Editing (18 features):**
+1. OCR Text Detection (EasyOCR)
+2. Click-to-Edit
+3. Font Selection (753+ fonts)
+4. Font Size Control + Quick ➕➖
+5. Text Color Picker + Recent Colors
+6. Background Color + Transparency
+7. Bold/Italic Support
+8. Text Alignment (L/C/R)
+9. Text Rotation (0-360°)
+10. Opacity Control
+11. Letter Spacing
+12. Text Case Converter (5 options)
+13. Border Controls (complete)
+14. Text Shadow (4 presets)
+15. Underline/Strikethrough
+16. Text Decoration
+17. Multi-line Text Mode
+18. **Spell Checker** ✓ NEW
+
+### **Layout & Positioning (13 features):**
+19. Drag & Move
+20. Resize Text Boxes
+21. Move Handle
+22. Size Controls (W:/H:)
+23. Grid Overlay (10px/50px)
+24. Rulers (H + V)
+25. Snap to Grid
+26. Layer Management
+27. Multi-Select (Shift/Ctrl+Click)
+28. Alignment & Distribution (8 ops)
+29. Keyboard Arrow Nudging
+30. Bulk Drag (multiple boxes)
+31. Text Box Grouping (Ctrl+G)
+
+### **Page Management (11 features):**
+32. Multi-Page Support
+33. Page Navigation
+34. Jump to Page
+35. Page Thumbnails
+36. Page Counter
+37. Delete Page
+38. Duplicate Page
+39. Extract Pages
+40. Rotate Page
+41. Insert Blank Page
+42. Page Layout Modes
+
+### **Annotation Tools (9 features):**
+43. Text Highlighting (5 colors)
+44. Highlighter Cursor
+45. Signature Upload
+46. Insert Images
+47. Watermark Tool
+48. Sticky Notes
+49. Callouts
+50. Eraser Tool
+51. **Freehand Drawing** ✏️ NEW
+
+### **Document Operations (7 features):**
+52. PDF Merge
+53. PDF Split
+54. Extract Pages
+55. Export to PNG/JPG
+56. Export to HTML
+57. Save Session
+58. Load Session
+
+### **Editing Operations (8 features):**
+59. Undo (with dropdown)
+60. Redo
+61. Copy Text Box
+62. Paste Text Box
+63. Quick Duplicate (Ctrl+D)
+64. Delete Text Box
+65. Bulk Delete
+66. Find & Replace
+
+### **Selection System (7 features):**
+67. Select All (Ctrl+A)
+68. Multi-Select (Shift+Click)
+69. Toggle Select (Ctrl+Click)
+70. Clear Selection (Escape)
+71. Selection Count Display
+72. Visual Selection Indicators
+73. Copy/Paste Style (Ctrl+Shift+C/V)
+
+### **View & Navigation (6 features):**
+74. Zoom Controls (25-200%)
+75. Zoom Slider
+76. Fit Width
+77. Fit Page
+78. Fullscreen Mode
+79. Print Preview
+
+### **Smart Features (10 features):**
+80. Auto-Save (30 seconds)
+81. Session Recovery
+82. Text Statistics
+83. Recent Files List
+84. Text Box Templates
+85. Multi-line Mode Toggle
+86. Hover Tooltips
+87. Click-to-Edit Mode
+88. Recent Colors Palette
+89. Font Info Display
+
+### **Keyboard Shortcuts (20 shortcuts):**
+90-109. [All 20+ shortcuts listed above]
+
+### **UI/UX (10 features):**
+110. Bengali/Bangla Support
+111. Bilingual Status Messages
+112. Font Control Panel
+113. Quick Color Picker
+114. Highlight Color Panel
+115. Size Controls Panel
+116. Alignment Toolbar
+117. Move Handle Visualization
+118. Visual Button Feedback
+119. Professional UI Design
+
+### **Backend (8 features):**
+120-127. EasyOCR, PyMuPDF, Font Matching, Metadata, etc.
+

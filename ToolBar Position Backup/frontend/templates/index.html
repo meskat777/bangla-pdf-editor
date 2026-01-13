@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>বাংলা পিডিএফ এডিটর | Bangla PDF Editor</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/ribbon.css">
+</head>
+<body>
+    <!-- Single Toolbar - All Tools -->
+    <div class="toolbar-container">
+        <div class="toolbar-header">
+            <div class="toolbar-title">
+                <h1>বাংলা পিডিএফ এডিটর | Bangla PDF Editor</h1>
+            </div>
+        </div>
+        
+        <div class="toolbar-content">
+            <!-- File Operations -->
+            <div class="toolbar-group">
+                <button class="toolbar-btn-small" onclick="document.getElementById('pdfUpload').click()" title="Open PDF">
+                    <span class="toolbar-icon">📂</span>
+                </button>
+                <button class="toolbar-btn-small" onclick="saveBtn.click()" title="Save PDF">
+                    <span class="toolbar-icon">💾</span>
+                </button>
+                <button class="toolbar-btn-small" onclick="downloadBtn.click()" title="Download PDF">
+                    <span class="toolbar-icon">⬇️</span>
+                </button>
+            </div>
+            
+            <div class="toolbar-separator"></div>
+            
+            <!-- Edit Operations -->
+            <div class="toolbar-group">
+                <button class="toolbar-btn-small" onclick="undo()" title="Undo">
+                    <span class="toolbar-icon">↶</span>
+                </button>
+                <button class="toolbar-btn-small" onclick="redo()" title="Redo">
+                    <span class="toolbar-icon">↷</span>
+                </button>
+            </div>
+            
+            <div class="toolbar-separator"></div>
+            
+            <!-- Text Operations -->
+            <div class="toolbar-group">
+                <button class="toolbar-btn-small" onclick="addTextBtn.click()" title="Add Text">
+                    <span class="toolbar-icon">➕</span>
+                </button>
+                <button class="toolbar-btn-small" onclick="deleteTextBtn.click()" title="Delete Text">
+                    <span class="toolbar-icon">🗑️</span>
+                </button>
+            </div>
+            
+            <div class="toolbar-separator"></div>
+            
+            <!-- Annotation Tools -->
+            <div class="toolbar-group">
+                <button class="toolbar-btn-small" onclick="highlightBtn.click()" title="Highlight">
+                    <span class="toolbar-icon">🖍️</span>
+                </button>
+                <button class="toolbar-btn-small" onclick="drawBtn.click()" title="Draw">
+                    <span class="toolbar-icon">✏️</span>
+                </button>
+                <button class="toolbar-btn-small" onclick="signatureBtn.click()" title="Signature">
+                    <span class="toolbar-icon">✒️</span>
+                </button>
+            </div>
+            
+            <div class="toolbar-separator"></div>
+            
+            <!-- Insert Objects -->
+            <div class="toolbar-group">
+                <button class="toolbar-btn-small" onclick="imageBtn.click()" title="Add Image">
+                    <span class="toolbar-icon">🖼️</span>
+                </button>
+                <button class="toolbar-btn-small" onclick="watermarkBtn.click()" title="Watermark">
+                    <span class="toolbar-icon">💧</span>
+                </button>
+            </div>
+            
+            <div class="toolbar-separator"></div>
+            
+            <!-- Page Operations -->
+            <div class="toolbar-group">
+                <button class="toolbar-btn-small" onclick="addPageBtn.click()" title="Add Page">
+                    <span class="toolbar-icon">➕📄</span>
+                </button>
+                <button class="toolbar-btn-small" onclick="deletePageBtn.click()" title="Delete Page">
+                    <span class="toolbar-icon">🗑️📄</span>
+                </button>
+                <button class="toolbar-btn-small" onclick="rotateBtn.click()" title="Rotate Page">
+                    <span class="toolbar-icon">🔄</span>
+                </button>
+            </div>
+            
+            <div class="toolbar-separator"></div>
+            
+            <!-- View Controls -->
+            <div class="toolbar-group">
+                <button class="toolbar-btn-small" onclick="zoomInBtn.click()" title="Zoom In">
+                    <span class="toolbar-icon">🔍+</span>
+                </button>
+                <button class="toolbar-btn-small" onclick="zoomOutBtn.click()" title="Zoom Out">
+                    <span class="toolbar-icon">🔍-</span>
+                </button>
+                <button class="toolbar-btn-small" onclick="fitPageBtn.click()" title="Fit Page">
+                    <span class="toolbar-icon">📄</span>
+                </button>
+                <button class="toolbar-btn-small" onclick="printPreviewBtn.click()" title="Print Preview">
+                    <span class="toolbar-icon">🖨️</span>
+                </button>
+            </div>
+            
+            <div class="toolbar-separator"></div>
+            
+            <!-- Help -->
+            <div class="toolbar-group">
+                <button class="toolbar-btn-small" onclick="helpBtn.click()" title="Help">
+                    <span class="toolbar-icon">❓</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="app">
+        <!-- Main Content -->
+        <div class="main-container">
+            <!-- Left Panel - Page Thumbnails -->
+            <aside class="left-panel">
+                <h3>পেজ থাম্বনেল | Page Thumbnails</h3>
+                <div id="thumbnailContainer" class="thumbnail-container">
+                    <!-- Thumbnails will be added here dynamically -->
+                </div>
+            </aside>
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3>📁 ফাইল | File</h3>
+                    <label for="pdfUpload" class="btn btn-primary full-width">
+                        📤 পিডিএফ আপলোড করুন
+                        <input type="file" id="pdfUpload" accept=".pdf" hidden>
+                    </label>
+                    <button id="saveBtn" class="btn btn-success full-width" disabled>
+                        💾 সংরক্ষণ করুন | Save
+                    </button>
+                    <button id="downloadBtn" class="btn btn-info full-width" disabled>
+                        ⬇️ ডাউনলোড করুন | Download
+                    </button>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>✏️ টেক্সট এডিট | Text Edit</h3>
+                    <button id="addTextBtn" class="btn full-width" disabled>
+                        ➕ টেক্সট যোগ করুন | Add Text
+                    </button>
+                    <button id="deleteTextBtn" class="btn full-width" disabled>
+                        🗑️ টেক্সট মুছুন | Delete Text
+                    </button>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>🎨 এনোটেশন | Annotation</h3>
+                    <button id="highlightBtn" class="btn full-width" disabled>
+                        🖍️ হাইলাইট | Highlight
+                    </button>
+                    <button id="signatureBtn" class="btn full-width" disabled>
+                        ✒️ স্বাক্ষর | Signature
+                    </button>
+                    <button id="imageBtn" class="btn full-width" disabled>
+                        🖼️ ছবি যোগ করুন | Add Image
+                    </button>
+                    <button id="watermarkBtn" class="btn full-width" disabled>
+                        💧 ওয়াটারমার্ক | Watermark
+                    </button>
+                    <button id="drawBtn" class="btn full-width" disabled>
+                        ✏️ আঁকুন | Draw
+                    </button>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>📄 পেজ | Pages</h3>
+                    <button id="addPageBtn" class="btn full-width" disabled>
+                        ➕ পেজ যোগ করুন | Add Page
+                    </button>
+                    <button id="deletePageBtn" class="btn full-width" disabled>
+                        🗑️ পেজ মুছুন | Delete Page
+                    </button>
+                    <button id="rotatePageBtn" class="btn full-width" disabled>
+                        🔄 পেজ ঘুরান | Rotate Page
+                    </button>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>🔧 ডকুমেন্ট | Document</h3>
+                    <button id="mergeBtn" class="btn full-width" disabled>
+                        🔗 মার্জ করুন | Merge
+                    </button>
+                    <button id="splitBtn" class="btn full-width" disabled>
+                        ✂️ স্প্লিট করুন | Split
+                    </button>
+                    <button id="exportBtn" class="btn full-width" disabled>
+                        📤 এক্সপোর্ট | Export
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Workspace -->
+            <main class="workspace">
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div class="toolbar-group">
+                        <button id="undoBtn" class="btn-icon" title="আনডু | Undo" disabled>↶</button>
+                        <button id="redoBtn" class="btn-icon" title="রেডো | Redo" disabled>↷</button>
+                    </div>
+                    
+                    <div class="toolbar-group">
+                        <button id="zoomOutBtn" class="btn-icon" title="জুম আউট | Zoom Out" disabled>−</button>
+                        <span id="zoomLevel">100%</span>
+                        <button id="zoomInBtn" class="btn-icon" title="জুম ইন | Zoom In" disabled>+</button>
+                    </div>
+
+                    <div class="toolbar-group">
+                        <button id="prevPageBtn" class="btn-icon" title="পূর্ববর্তী পেজ | Previous Page" disabled>◀</button>
+                        <span id="pageInfo">Page 0 / 0</span>
+                        <button id="nextPageBtn" class="btn-icon" title="পরবর্তী পেজ | Next Page" disabled>▶</button>
+                    </div>
+
+                    <div class="toolbar-group">
+                        <button id="gridBtn" class="btn-icon" title="গ্রিড | Grid" disabled>⊞</button>
+                        <button id="rulerBtn" class="btn-icon" title="রুলার | Ruler" disabled>📏</button>
+                    </div>
+
+                    <div class="toolbar-group">
+                        <button id="printPreviewBtn" class="btn-icon" title="প্রিন্ট প্রিভিউ | Print Preview" disabled>🖨️</button>
+                    </div>
+                </div>
+
+                <!-- PDF Canvas Area -->
+                <div class="canvas-container">
+                    <div id="loadingMessage" class="message">
+                        <h2>📄 বাংলা পিডিএফ এডিটরে স্বাগতম</h2>
+                        <p>একটি পিডিএফ ফাইল আপলোড করুন শুরু করতে</p>
+                        <p>Welcome to Bangla PDF Editor</p>
+                        <p>Upload a PDF file to get started</p>
+                    </div>
+                    <div class="canvas-wrapper" id="canvasWrapper">
+                        <canvas id="pdfCanvas"></canvas>
+                        <div id="textOverlay"></div>
+                    </div>
+                </div>
+
+                <!-- Text Edit Panel (Hidden by default) -->
+                <div id="textEditPanel" class="edit-panel" style="display: none;">
+                    <div class="edit-panel-header">
+                        <h4>টেক্সট এডিট করুন | Edit Text</h4>
+                        <button id="closeEditPanel" class="btn-close">×</button>
+                    </div>
+                    <div class="edit-panel-body">
+                        <textarea id="editTextArea" rows="3"></textarea>
+                        
+                        <div class="control-group">
+                            <label>ফন্ট | Font:</label>
+                            <select id="fontSelect">
+                                <option value="helv">Helvetica</option>
+                                <option value="times">Times</option>
+                                <option value="courier">Courier</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label>সাইজ | Size:</label>
+                            <input type="number" id="fontSize" value="12" min="6" max="72">
+                            <button class="btn-sm" id="fontSizeDec">−</button>
+                            <button class="btn-sm" id="fontSizeInc">+</button>
+                        </div>
+
+                        <div class="control-group">
+                            <label>রঙ | Color:</label>
+                            <input type="color" id="textColor" value="#000000">
+                        </div>
+
+                        <div class="control-group">
+                            <label>স্টাইল | Style:</label>
+                            <div class="style-buttons">
+                                <button class="btn-style" id="boldBtn" data-style="bold"><b>B</b></button>
+                                <button class="btn-style" id="italicBtn" data-style="italic"><i>I</i></button>
+                                <button class="btn-style" id="underlineBtn" data-style="underline"><u>U</u></button>
+                            </div>
+                        </div>
+
+                        <div class="edit-panel-actions" style="margin-top: 1rem; margin-bottom: 1rem;">
+                            <button id="applyEditBtn" class="btn btn-primary full-width">
+                                ✓ প্রয়োগ করুন | Apply
+                            </button>
+                            <button id="cancelEditBtn" class="btn full-width" style="margin-top: 0.5rem;">
+                                ✕ বাতিল করুন | Cancel
+                            </button>
+                        </div>
+
+                        <div class="control-group">
+                            <label>সারিবদ্ধ | Align:</label>
+                            <div class="align-buttons">
+                                <button class="btn-style" data-align="left">⬅️</button>
+                                <button class="btn-style" data-align="center">↔️</button>
+                                <button class="btn-style" data-align="right">➡️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Status Bar -->
+        <footer class="status-bar">
+            <div id="statusMessage">প্রস্তুত | Ready</div>
+            <div id="sessionInfo"></div>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <div id="modalOverlay" class="modal-overlay" style="display: none;">
+        <div id="modalContent" class="modal-content">
+            <!-- Dynamic modal content -->
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
